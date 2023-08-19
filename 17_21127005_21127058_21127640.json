@@ -1,0 +1,209 @@
+[
+    {
+        "id": "60ddc40d1fc960e8",
+        "type": "tab",
+        "label": "Signin",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "306825e0490b2290",
+        "type": "function",
+        "z": "60ddc40d1fc960e8",
+        "name": "Account Verification",
+        "func": "var accounts =  flow.get(\"accounts\") || [ { username : \"admin\", password : \"admin\"},{ username : \"guest\", password : \"guest\"}] ; \n\nvar username = msg.payload.username ;\nvar password = msg.payload.password ; \n\nmsg.payload = 1;\n\naccounts.forEach(function ( account ){\n    if ( account.username == username ) {\n       msg.payload = 2;\n       if ( account.password == password ) {\n           msg.payload = 0;\n       } \n    }\n});\n\n\n// keep the original socketid from msg.socketid;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 313.9999771118164,
+        "y": 193.0000114440918,
+        "wires": [
+            [
+                "492769bf3c4a8095"
+            ]
+        ]
+    },
+    {
+        "id": "492769bf3c4a8095",
+        "type": "switch",
+        "z": "60ddc40d1fc960e8",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 482.99997329711914,
+        "y": 223.9999942779541,
+        "wires": [
+            [
+                "24b0983fd56dfece"
+            ],
+            [
+                "e69e21f9bfa672ae"
+            ],
+            [
+                "858a06430a69a976"
+            ]
+        ]
+    },
+    {
+        "id": "24b0983fd56dfece",
+        "type": "function",
+        "z": "60ddc40d1fc960e8",
+        "name": "= 0 : Success",
+        "func": "/* activate session timer */\nvar sessionTimer =  flow.get(\"sessionTimer\") || 0; \nvar currTime = Date.now();\nflow.set(\"sessionTimer\", currTime);\nflow.set(\"clientid\", msg.socketid);\n/* ui-control payload */\nmsg.payload = { group: {\n    show : [\"Dashboard_SensorData\", \"Another_History\"],\n    hide : [\"Dashboard_Signin\"]\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 652.9998168945312,
+        "y": 180.00000381469727,
+        "wires": [
+            [
+                "39f6517d3de0ca14"
+            ]
+        ]
+    },
+    {
+        "id": "e69e21f9bfa672ae",
+        "type": "function",
+        "z": "60ddc40d1fc960e8",
+        "name": "= 1 : Unknown User",
+        "func": "msg.payload = \"Username Doesn't exist!!!\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 673.9998245239258,
+        "y": 217.0000057220459,
+        "wires": [
+            [
+                "409a0eea339c2221"
+            ]
+        ]
+    },
+    {
+        "id": "858a06430a69a976",
+        "type": "function",
+        "z": "60ddc40d1fc960e8",
+        "name": "= 2 : Wrong Password",
+        "func": "msg.payload = \"Invalid Password\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 674.9998931884766,
+        "y": 254.000018119812,
+        "wires": [
+            [
+                "409a0eea339c2221"
+            ]
+        ]
+    },
+    {
+        "id": "902ced65058b26e1",
+        "type": "ui_form",
+        "z": "60ddc40d1fc960e8",
+        "name": "Dashboard Sign-In",
+        "label": "",
+        "group": "827f0f3f620f8417",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "username",
+                "value": "username",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "password",
+                "value": "password",
+                "type": "password",
+                "required": true,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "username": "",
+            "password": ""
+        },
+        "payload": "",
+        "submit": "submit",
+        "cancel": "cancel",
+        "topic": "",
+        "topicType": "str",
+        "splitLayout": false,
+        "x": 101.99993133544922,
+        "y": 178.0000057220459,
+        "wires": [
+            [
+                "306825e0490b2290"
+            ]
+        ]
+    },
+    {
+        "id": "409a0eea339c2221",
+        "type": "ui_toast",
+        "z": "60ddc40d1fc960e8",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "",
+        "topic": "Authentication Failed",
+        "name": "Authentication Failure Dialog",
+        "x": 939.9999046325684,
+        "y": 237.0000057220459,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "39f6517d3de0ca14",
+        "type": "ui_ui_control",
+        "z": "60ddc40d1fc960e8",
+        "name": "Go to Sensor/History Group",
+        "events": "all",
+        "x": 940,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "827f0f3f620f8417",
+        "type": "ui_group",
+        "name": "Signin",
+        "tab": "6bc82a2b9efcfb64",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "6bc82a2b9efcfb64",
+        "type": "ui_tab",
+        "name": "Dashboard",
+        "icon": "dashboard",
+        "order": 1
+    }
+]
